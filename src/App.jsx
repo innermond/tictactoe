@@ -1,8 +1,11 @@
 import { WinnerIs, Board, History } from "./components";
 import useGameState from "./state";
+import { useState } from "react";
+import WonContext from "./board-context";
 import "./App.css";
 
 const Game = () => {
+  const [won, setWon] = useState(null);
   const { state, current, setHistory, setPos, setWinnerIs } = useGameState();
 
   const onclick = (i) => {
@@ -21,8 +24,11 @@ const Game = () => {
       state.history.splice(state.pos + 1);
       state.history.push(fresh);
     }
-    const winner = checkWinner(fresh);
-    if (winner) setWinnerIs(winner);
+    const [winner, wonIndices] = checkWinner(fresh);
+    if (winner) {
+      setWon(wonIndices);
+      setWinnerIs(winner);
+    }
     setPos(state.pos + 1);
     setHistory([...state.history]);
   }
@@ -30,13 +36,19 @@ const Game = () => {
   const onjump = (i) => {
     console.log(`jumped to ${i}`);
     setPos(i);
-    const winner = checkWinner(state.history[i]);
+    setWon(null);
+    const [winner, wonIndices] = checkWinner(state.history[i]);
     setWinnerIs(winner);
+    if (winner) {
+      setWon(wonIndices);
+    }
   }
 
   return <div className="container">
     <WinnerIs winnerIs={state.winnerIs} />
-    <Board current={current} onclick={onclick} />
+    <WonContext.Provider value={won}>
+      <Board current={current} onclick={onclick} />
+    </WonContext.Provider>
     <History history={state.history} onjump={onjump} />
   </div>
 }
@@ -54,14 +66,15 @@ const checkWinner = (squares) => {
   for (const [x, y, z] of winning) {
     if (!(squares[x] && squares[y] && squares[z])) continue;
     if (squares[x] === squares[y] && squares[y] === squares[z]) {
-      return squares[x];
+      return [squares[x], [x, y, z]];
     };
   }
-  return null;
+  return [null, null];
 };
 
 function App() {
   return <>
+    <Game />
     <Game />
   </>
 }

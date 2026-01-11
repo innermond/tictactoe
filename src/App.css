@@ -36,6 +36,9 @@
 .square:nth-child(4), .square:nth-child(7) {
   clear: left;
 }
+.square.won {
+  background: #444;
+}
 
 button {
   border-radius: 8px;
