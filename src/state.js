@@ -1,7 +1,23 @@
-import { useState } from "react";
+import { useReducer } from "react";
+
+const SET_HISTORY = 0;
+const SET_POS = 1;
+const SET_WINNER_IS = 2;
 
 const useGameState = () => {
-  const [state, setState] = useState({
+  const reducer = (s, op) => {
+    switch (op.type) {
+      case SET_HISTORY:
+        return { ...s, history: op.data };
+      case SET_POS:
+        return { ...s, pos: op.data };
+      case SET_WINNER_IS:
+        return { ...s, winnerIs: op.data };
+      default:
+        throw new Error("unknown operation");
+    }
+  };
+  const [state, dispatch] = useReducer(reducer, {
     history: [Array(9).fill(null)],
     pos: 0,
     winnerIs: null,
@@ -9,21 +25,9 @@ const useGameState = () => {
   const current = state.history[state.pos];
   console.log(current)
 
-  const setHistory = (h) => setState(prev => {
-    const s = { ...prev };
-    s.history = h;
-    return s;
-  });
-  const setPos = (p) => setState(prev => {
-    const s = { ...prev };
-    s.pos = p;
-    return s;
-  });
-  const setWinnerIs = (w) => setState(prev => {
-    const s = { ...prev };
-    s.winnerIs = w;
-    return s;
-  });
+  const setHistory = (h) => dispatch({ type: SET_HISTORY, data: h });
+  const setPos = (p) => dispatch({ type: SET_POS, data: p });
+  const setWinnerIs = (w) => dispatch({ type: SET_WINNER_IS, data: w });
 
   return { state, current, setHistory, setPos, setWinnerIs };
 };
