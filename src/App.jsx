@@ -2,45 +2,63 @@ import { useState } from "react";
 import "./App.css";
 
 const Game = () => {
-  const [history, setHistory] = useState([Array(9).fill(null)]);
-  const [pos, setPos] = useState(0);
-  const [winnerIs, setWinnerIs] = useState(null);
-  const current = history[pos];
+  const [state, setState] = useState({
+    history: [Array(9).fill(null)],
+    pos: 0,
+    winnerIs: null,
+  });
+  const current = state.history[state.pos];
+  console.log(current)
+
+  const setHistory = (h) => setState(prev => {
+    const s = { ...prev };
+    s.history = h;
+    return s;
+  });
+  const setPos = (p) => setState(prev => {
+    const s = { ...prev };
+    s.pos = p;
+    return s;
+  });
+  const setWinnerIs = (w) => setState(prev => {
+    const s = { ...prev };
+    s.winnerIs = w;
+    return s;
+  });
 
   const onclick = (i) => {
     console.log("square clicked");
-    const modeAdd = pos === history.length - 1;
-    console.log(modeAdd);
+    const modeAdd = state.pos === state.history.length - 1;
 
     if (current[i] !== null) return;
-    if (winnerIs !== null) return;
-    const xo = pos % 2 === 0 ? "X" : "O";
-    console.log(pos);
+    if (state.winnerIs !== null) return;
+    const xo = state.pos % 2 === 0 ? "X" : "O";
+    console.log(state.pos);
     const fresh = [...current];
     fresh[i] = xo;
     if (modeAdd) {
-      history.push(fresh);
+      state.history.push(fresh);
     } else {
-      history.splice(pos + 1);
-      history.push(fresh);
+      state.history.splice(state.pos + 1);
+      state.history.push(fresh);
     }
     const winner = checkWinner(fresh);
     if (winner) setWinnerIs(winner);
-    setPos((p) => { return p + 1; });
-    setHistory([...history]);
+    setPos(state.pos + 1);
+    setHistory([...state.history]);
   }
 
   const onjump = (i) => {
     console.log(`jumped to ${i}`);
     setPos(i);
-    const winner = checkWinner(history[i]);
+    const winner = checkWinner(state.history[i]);
     setWinnerIs(winner);
   }
 
   return <div className="container">
-    <WinnerIs winnerIs={winnerIs} />
+    <WinnerIs winnerIs={state.winnerIs} />
     <Board current={current} onclick={onclick} />
-    <History history={history} onjump={onjump} />
+    <History history={state.history} onjump={onjump} />
   </div>
 }
 
@@ -68,7 +86,6 @@ const checkWinner = (squares) => {
     [2, 4, 6],
   ];
   for (const [x, y, z] of winning) {
-    console.log(x, y, z, squares[x], squares[y], squares[z]);
     if (!(squares[x] && squares[y] && squares[z])) continue;
     if (squares[x] === squares[y] && squares[y] === squares[z]) {
       return squares[x];
