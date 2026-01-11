@@ -1,10 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 
-const Square = ({ value, onclick }) => {
-  return <button className="square" onClick={() => onclick()}> {value}</button>;
-};
-const Board = () => {
+const Game = () => {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [pos, setPos] = useState(0);
   const [winnerIs, setWinnerIs] = useState(null);
@@ -41,11 +38,23 @@ const Board = () => {
   }
 
   return <div className="container">
-    {winnerIs && <p className="winner">winner is {winnerIs}</p>}
-    <div className="row">{current.map((val, i) => <Square key={i} value={val} onclick={() => onclick(i)} />)}</div>
-    <div className="row">{history.length > 0 && history.map((_, i) => <button key={i} onClick={() => onjump(i)}>{i > 0 ? `step ${i}` : "reset"}</button>)}</div>
+    <WinnerIs winnerIs={winnerIs} />
+    <Board current={current} onclick={onclick} />
+    <History history={history} onjump={onjump} />
   </div>
 }
+
+const Square = ({ value, onclick }) => {
+  return <button className="square" onClick={() => onclick()}> {value}</button>;
+};
+
+const WinnerIs = ({ winnerIs }) => (winnerIs && <p className="winner">winner is {winnerIs}</p>);
+
+const Board = ({ current, onclick }) => (<div className="row">{current.map((val, i) => <Square key={i} value={val} onclick={() => onclick(i)} />)}</div>);
+
+const History = ({ history, onjump }) => {
+  return (<div className="row">{history.length > 0 && history.map((_, i) => <button key={i} onClick={() => onjump(i)}>{i > 0 ? `step ${i}` : "reset"}</button>)}</div>)
+};
 
 const checkWinner = (squares) => {
   const winning = [
@@ -70,7 +79,7 @@ const checkWinner = (squares) => {
 
 function App() {
   return <>
-    <Board />
+    <Game />
   </>
 }
 
