@@ -18,11 +18,11 @@ const Game = () => {
     console.log(state.pos);
     const fresh = [...current];
     fresh[i] = xo;
+    let history;
     if (modeAdd) {
-      state.history.push(fresh);
+      history = [...state.history, fresh];
     } else {
-      state.history.splice(state.pos + 1);
-      state.history.push(fresh);
+      history = [...state.history.slice(0, state.pos + 1), fresh];
     }
     const [winner, wonIndices] = checkWinner(fresh);
     if (winner) {
@@ -30,7 +30,7 @@ const Game = () => {
       setWinnerIs(winner);
     }
     setPos(state.pos + 1);
-    setHistory([...state.history]);
+    setHistory(history);
   }
 
   const onjump = (i) => {
@@ -74,7 +74,6 @@ const checkWinner = (squares) => {
 
 function App() {
   return <>
-    <Game />
     <Game />
   </>
 }

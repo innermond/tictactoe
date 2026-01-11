@@ -1,8 +1,7 @@
-import { useContext } from "react";
-import WonContext from "./board-context";
+import { useWon } from "./board-context";
 
 const Square = ({ value, onclick, index }) => {
-  const wonIndices = useContext(WonContext);
+  const wonIndices = useWon();
   const classes = wonIndices?.includes(index) ? "square won" : "square";
   return <button className={classes} onClick={() => onclick()}> {value}</button>;
 };
