@@ -1,7 +1,6 @@
 import { WinnerIs, Board, History } from "./components";
 import useGameState from "./state";
 import { useState } from "react";
-import WonContext from "./board-context";
 import "./App.css";
 
 const Game = () => {
@@ -46,9 +45,7 @@ const Game = () => {
 
   return <div className="container">
     <WinnerIs winnerIs={state.winnerIs} />
-    <WonContext.Provider value={won}>
-      <Board current={current} onclick={onclick} />
-    </WonContext.Provider>
+    <Board current={current} onclick={onclick} won={won} />
     <History history={state.history} onjump={onjump} />
   </div>
 }
