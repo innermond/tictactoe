@@ -1,4 +1,4 @@
-import { WinnerIs, Board, History } from "./components";
+import { Message, Board, History } from "./components";
 import useGameState from "./state";
 import { useState } from "react";
 import "./App.css";
@@ -6,6 +6,7 @@ import "./App.css";
 const Game = () => {
   const [won, setWon] = useState(null);
   const { state, current, setHistory, setPos, setWinnerIs } = useGameState();
+  const xo = state.pos % 2 === 0 ? "X" : "O";
 
   const onclick = (i) => {
     console.log("square clicked");
@@ -13,7 +14,6 @@ const Game = () => {
 
     if (current[i] !== null) return;
     if (state.winnerIs !== null) return;
-    const xo = state.pos % 2 === 0 ? "X" : "O";
     console.log(state.pos);
     const fresh = [...current];
     fresh[i] = xo;
@@ -44,7 +44,7 @@ const Game = () => {
   }
 
   return <div className="container">
-    <WinnerIs winnerIs={state.winnerIs} />
+    <Message winnerIs={state.winnerIs} xo={xo} />
     <Board current={current} onclick={onclick} won={won} />
     <History history={state.history} onjump={onjump} />
   </div>
