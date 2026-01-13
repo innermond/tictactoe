@@ -9,7 +9,6 @@ const format = (t) => {
 }
 
 const Timer = ({ countdown, start, onExpired }) => {
-  // convert countdown to s ms format 
   let time = useRef(countdown * 1000);
   const timmerId = useRef(null);
   const [display, setDisplay] = useState(time.current);
@@ -20,21 +19,23 @@ const Timer = ({ countdown, start, onExpired }) => {
       timmerId.current = null;
     };
 
+    time.current = countdown * 1000;
+    setDisplay(time.current);
+
     if (start === STOP) {
       cleanup();
       return;
-    } else {
-      time.current = countdown * 1000;
-      setDisplay(time.current);
     }
 
     timmerId.current = setInterval(() => {
       time.current -= STEP;
-      setDisplay(time.current);
       if (time.current <= 0) {
         onExpired(true);
         cleanup();
+        setDisplay(0);
+        return;
       }
+      setDisplay(time.current);
       if (start === STOP) {
         cleanup();
       }

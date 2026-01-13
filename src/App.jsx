@@ -58,7 +58,13 @@ const Game = () => {
     setPos(i);
     setWon(null);
     setCounting(STOP);
-    lastClicked.current = [];
+    lastClicked.current = state.history[i].reduce((acc, elem, idx) => {
+      console.log(acc, elem, idx)
+      if (elem === null) return acc;
+      acc.push(idx);
+      return acc;
+    }, []);
+    console.log("lastClicked", lastClicked.current)
     const [winner, wonIndices] = checkWinner(state.history[i]);
     setWinnerIs(winner);
     if (winner) {
