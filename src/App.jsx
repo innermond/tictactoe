@@ -1,11 +1,12 @@
 import { Message, Board, History, Timer } from "./components";
 import { STOP } from "./timer-component";
 import useGameState from "./state";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./App.css";
+import { WORK_TERMINATE, WORK_CHECK_WINNER } from "./work-constants.js";
 
 const Game = () => {
-  const TIME_PER_MOVE = 5000;
+  const TIME_PER_MOVE = 5;
   const [won, setWon] = useState(null);
   const { state, current, setHistory, setPos, setWinnerIs } = useGameState();
   const xo = state.pos % 2 === 0 ? "X" : "O";
@@ -20,20 +21,32 @@ const Game = () => {
     }
   };
 
+  const workerRef = useRef(null);
+  useEffect(() => {
+    console.log("effect worker run")
+    const worker = new Worker(
+      new URL("./worker.js", import.meta.url),
+      { type: "module" }
+    );
+    worker.onmessage = e => console.log("message from worker", e.data)
+
+    workerRef.current = worker;
+
+    return () => {
+      worker.terminate();
+    }
+
+  }, []);
+
+
   const onclick = async (i) => {
-    let startTime = performance.now();
-    // When you use your kitchen as a gym hal too
-    // run CPU bound code in same UI thread
-    const val = new Promise((resolve) => setTimeout(() => {
-      resolve(true);
-      for (const _ of Array(700_000_000).keys()) { }
-      console.log("done for")
-    }, 1000));
-    val.then(v => {
-      let endTime = performance.now()
-      const elapsed = endTime - startTime;
-      console.log(`${v} after 1s? elapsed time is ${elapsed / 1_000}??`)
-    });
+    // run CPU bound code in worker thread
+    workerRef.current.postMessage({ kind: WORK_CHECK_WINNER, payload: [], id: crypto.randomUUID() });
+    // kill it later
+    setTimeout(() => {
+      console.log("ui: WORK_TERMINATE");
+      workerRef.current.postMessage({ kind: WORK_TERMINATE });
+    }, 1000);
     if (current[i] !== null) return;
     if (state.winnerIs !== null) return;
 
