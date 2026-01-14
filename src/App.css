@@ -24,17 +24,20 @@
 .row {
     margin-bottom: 1.2em;
   }
+.row button {
+  float: left;
+}
+.row button:nth-child(4), .row button:nth-child(7) {
+  clear: left;
+}
+
 .winner {
     font-weight: 600;
     text-transform: uppercase;
 }
 .square {
-  float: left;
   width: 60px;
   height: 60px;
-}
-.square:nth-child(4), .square:nth-child(7) {
-  clear: left;
 }
 .square.won {
   background: #444;
@@ -42,7 +45,7 @@
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid #0f0f0f;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
