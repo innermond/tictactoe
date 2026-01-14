@@ -5,7 +5,7 @@ import { useState, useRef } from "react";
 import "./App.css";
 
 const Game = () => {
-  const TIME_PER_MOVE = 5;
+  const TIME_PER_MOVE = 5000;
   const [won, setWon] = useState(null);
   const { state, current, setHistory, setPos, setWinnerIs } = useGameState();
   const xo = state.pos % 2 === 0 ? "X" : "O";
@@ -20,7 +20,18 @@ const Game = () => {
     }
   };
 
-  const onclick = (i) => {
+  const onclick = async (i) => {
+    let startTime = performance.now();
+    // When you use your kitchen as a gym hal too
+    // run CPU bound code in same UI thread
+    const val = await new Promise((resolve) => setTimeout(() => {
+      resolve(true);
+      for (const _ of Array(700_000_000).keys()) { }
+      console.log("done for")
+    }, 1000));
+    let endTime = performance.now()
+    const elapsed = endTime - startTime;
+    console.log(`${val} after 1s ? elapsed time is ${elapsed / 1_000}??`)
     if (current[i] !== null) return;
     if (state.winnerIs !== null) return;
 
@@ -59,7 +70,6 @@ const Game = () => {
     setWon(null);
     setCounting(STOP);
     lastClicked.current = state.history[i].reduce((acc, elem, idx) => {
-      console.log(acc, elem, idx)
       if (elem === null) return acc;
       acc.push(idx);
       return acc;
