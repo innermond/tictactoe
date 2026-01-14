@@ -24,14 +24,16 @@ const Game = () => {
     let startTime = performance.now();
     // When you use your kitchen as a gym hal too
     // run CPU bound code in same UI thread
-    const val = await new Promise((resolve) => setTimeout(() => {
+    const val = new Promise((resolve) => setTimeout(() => {
       resolve(true);
       for (const _ of Array(700_000_000).keys()) { }
       console.log("done for")
     }, 1000));
-    let endTime = performance.now()
-    const elapsed = endTime - startTime;
-    console.log(`${val} after 1s ? elapsed time is ${elapsed / 1_000}??`)
+    val.then(v => {
+      let endTime = performance.now()
+      const elapsed = endTime - startTime;
+      console.log(`${v} after 1s? elapsed time is ${elapsed / 1_000}??`)
+    });
     if (current[i] !== null) return;
     if (state.winnerIs !== null) return;
 
