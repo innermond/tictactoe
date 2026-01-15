@@ -1,8 +1,8 @@
-import { invoke } from '@tauri-apps/api/core';
+//import { invoke } from '@tauri-apps/api/core';
 import { Message, Board, History, Timer } from "./components";
 import { STOP } from "./timer-component";
 import useGameState from "./state";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useTransition } from "react";
 import "./App.css";
 import { WORK_TERMINATE, WORK_CHECK_WINNER } from "./work-constants.js";
 
@@ -65,12 +65,14 @@ const Game = () => {
     } else {
       history = [...state.history.slice(0, state.pos + 1), fresh];
     }
+    startTransition(async () => {
     const [winner, wonIndices] = await checkWinner(fresh);
     if (winner) {
       setWon(wonIndices);
       setWinnerIs(winner);
       setCounting(STOP);
     }
+    });
     setPos(state.pos + 1);
     setHistory(history);
     console.log("move", lastClicked.current.length === 9)
@@ -79,6 +81,8 @@ const Game = () => {
       setWinnerIs("nobody");
     };
   }
+
+  const [isPending, startTransition] = useTransition();
 
   const onjump = async (i) => {
     console.log(`jumped to ${i} counting ${counting}`);
@@ -91,14 +95,28 @@ const Game = () => {
       return acc;
     }, []);
     console.log("lastClicked", lastClicked.current)
+    startTransition(async () => {
     const [winner, wonIndices] = await checkWinner(state.history[i]);
     setWinnerIs(winner);
     if (winner) {
       setWon(wonIndices);
     }
+    });
   }
 
+  useEffect(() => {
+    if (isPending) {
+      document.body.classList.add("is-pending");
+    } else {
+      document.body.classList.remove("is-pending");
+    }
+    return () => {
+      document.body.classList.remove("is-pending");
+    };
+  }, [isPending]);
+
   return <div className="container">
+    {isPending ? "WAIT..." : "DONE"}
     <Message winnerIs={state.winnerIs} xo={xo} />
     <Timer countdown={TIME_PER_MOVE} start={counting} onExpired={onExpired} />
     <Board current={current} onclick={onclick} won={won} />
@@ -106,36 +124,39 @@ const Game = () => {
   </div>
 }
 
-//const checkWinner = (squares) => {
-//  const winning = [
-//    [0, 1, 2],
-//    [3, 4, 5],
-//    [6, 7, 8],
-//    [0, 3, 6],
-//    [1, 4, 7],
-//    [2, 5, 8],
-//    [0, 4, 8],
-//    [2, 4, 6],
-//  ];
-//  for (const [x, y, z] of winning) {
-//    if (!(squares[x] && squares[y] && squares[z])) continue;
-//    if (squares[x] === squares[y] && squares[y] === squares[z]) {
-//      return [squares[x], [x, y, z]];
-//    };
-//  }
-//  return [null, null];
-//};
-
-const checkWinner = async (squares) => {
-  try {
-    const result = await invoke('check_winner', { squares });
-    return result;
-  } catch (error) {
-    console.error('Error invoking check_winner:', error);
+const checkWinner = (squares) => {
+return new Promise(resolve => {
+  const winning = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  let result = [null, null];
+  for (const [x, y, z] of winning) {
+    if (!(squares[x] && squares[y] && squares[z])) continue;
+    if (squares[x] === squares[y] && squares[y] === squares[z]) {
+      result = [squares[x], [x, y, z]];
+    };
   }
+  setTimeout(() => resolve(result), 1000);
+});
 };
 
-function App() {
+//const checkWinner = async (squares) => {
+//  try {
+//    const result = await invoke('check_winner', { squares });
+//    return result;
+//  } catch (error) {
+//    console.error('Error invoking check_winner:', error);
+//  }
+//};
+
+const App = () => {
   return <>
     <Game />
   </>
