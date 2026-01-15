@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core';
 import { Message, Board, History, Timer } from "./components";
 import { STOP } from "./timer-component";
 import useGameState from "./state";
@@ -64,7 +65,7 @@ const Game = () => {
     } else {
       history = [...state.history.slice(0, state.pos + 1), fresh];
     }
-    const [winner, wonIndices] = checkWinner(fresh);
+    const [winner, wonIndices] = await checkWinner(fresh);
     if (winner) {
       setWon(wonIndices);
       setWinnerIs(winner);
@@ -79,7 +80,7 @@ const Game = () => {
     };
   }
 
-  const onjump = (i) => {
+  const onjump = async (i) => {
     console.log(`jumped to ${i} counting ${counting}`);
     setPos(i);
     setWon(null);
@@ -90,7 +91,7 @@ const Game = () => {
       return acc;
     }, []);
     console.log("lastClicked", lastClicked.current)
-    const [winner, wonIndices] = checkWinner(state.history[i]);
+    const [winner, wonIndices] = await checkWinner(state.history[i]);
     setWinnerIs(winner);
     if (winner) {
       setWon(wonIndices);
@@ -104,24 +105,34 @@ const Game = () => {
     <History history={state.history} onjump={onjump} />
   </div>
 }
-const checkWinner = (squares) => {
-  const winning = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (const [x, y, z] of winning) {
-    if (!(squares[x] && squares[y] && squares[z])) continue;
-    if (squares[x] === squares[y] && squares[y] === squares[z]) {
-      return [squares[x], [x, y, z]];
-    };
+
+//const checkWinner = (squares) => {
+//  const winning = [
+//    [0, 1, 2],
+//    [3, 4, 5],
+//    [6, 7, 8],
+//    [0, 3, 6],
+//    [1, 4, 7],
+//    [2, 5, 8],
+//    [0, 4, 8],
+//    [2, 4, 6],
+//  ];
+//  for (const [x, y, z] of winning) {
+//    if (!(squares[x] && squares[y] && squares[z])) continue;
+//    if (squares[x] === squares[y] && squares[y] === squares[z]) {
+//      return [squares[x], [x, y, z]];
+//    };
+//  }
+//  return [null, null];
+//};
+
+const checkWinner = async (squares) => {
+  try {
+    const result = await invoke('check_winner', { squares });
+    return result;
+  } catch (error) {
+    console.error('Error invoking check_winner:', error);
   }
-  return [null, null];
 };
 
 function App() {
