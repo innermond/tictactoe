@@ -18,11 +18,22 @@ const Game = () => {
   const [isPending, setIsPending] = useState(false);
   const onWinnerChecked = useEffectEvent(evt => {
     const [winner, wonIndices] = evt.payload;
-    if (winner) {
+    console.log(evt.target)
+    //TODO discriminate between onclick and onjump 
+    // onclick
+    if (winner && !isonjump.current) {
       setWon(wonIndices);
       setWinnerIs(winner);
       setCounting(STOP);
     }
+    // onjump
+    if (isonjump.current) {
+      setWon(wonIndices);
+      if (winner) {
+        setWinnerIs(winner);
+      }
+    }
+
     setIsPending(false);
   });
   useEffect(() => {
@@ -56,6 +67,8 @@ const Game = () => {
   }, []);
 
 
+  const isonjump = useRef(false);
+
   const onclick = async (i) => {
     // run CPU bound code in worker thread
     //workerRef.current.postMessage({ kind: WORK_CHECK_WINNER, payload: [], id: crypto.randomUUID() });
@@ -81,6 +94,7 @@ const Game = () => {
       history = [...state.history.slice(0, state.pos + 1), fresh];
     }
     setIsPending(true);
+    isonjump.current = false;
     checkWinner(fresh);
     //startTransition(async () => {
     //  const [winner, wonIndices] = await checkWinner(fresh);
@@ -119,6 +133,7 @@ const Game = () => {
       return acc;
     }, []);
     setIsPending(true);
+    isonjump.current = true;
     checkWinner(state.history[i]);
     //startTransition(async () => {
     //  const [winner, wonIndices] = await checkWinner(state.history[i]);

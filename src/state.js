@@ -23,7 +23,7 @@ const useGameState = () => {
     winnerIs: null,
   });
   const current = state.history[state.pos];
-  console.log(current)
+  console.log("state current", current)
 
   const setHistory = (h) => dispatch({ type: SET_HISTORY, data: h });
   const setPos = (p) => dispatch({ type: SET_POS, data: p });
