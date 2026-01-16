@@ -38,7 +38,7 @@ type WinnerPayload = (Option<SquareValue>, Option<[usize; 3]>);
 //}
 
 #[tauri::command]
-pub async fn check_winner(squares: Squares, app: tauri::AppHandle) {
+pub async fn check_winner(squares: Squares, kind: String, app: tauri::AppHandle) {
     //let squares = squares.clone();
     // Supposed to be CPU intensive
     tokio::task::spawn_blocking(move || {
@@ -60,11 +60,14 @@ pub async fn check_winner(squares: Squares, app: tauri::AppHandle) {
                 continue;
             }
             if squares[*x] == squares[*y] && squares[*y] == squares[*z] {
-                app.emit::<WinnerPayload>("winner-checked", (squares[*x], Some([*x, *y, *z])))
-                    .unwrap();
+                app.emit::<WinnerPayload>(
+                    format!("winner-checked-{}", kind).as_str(),
+                    (squares[*x], Some([*x, *y, *z])),
+                )
+                .unwrap();
             }
         }
-        app.emit::<WinnerPayload>("winner-checked", (None, None))
+        app.emit::<WinnerPayload>(format!("winner-checked-{}", kind).as_str(), (None, None))
             .unwrap();
     });
 }
